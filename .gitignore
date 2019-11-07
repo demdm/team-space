@@ -1,2 +1,3 @@
-# Ignore logs shared volume directory
 /logs
+/var
+docker/logs/

@@ -1,38 +1,46 @@
-application:
-    image: code
-    volumes:
-        - "symfony:/var/www/symfony"
-        - "logs/symfony:/var/www/symfony/app/logs"
-    tty: true
-db:
-    image: mysql
-    ports:
-        - "3306:3306"
-    environment:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: symfony
-        MYSQL_USER: root
-        MYSQL_PASSWORD: root
-php:
-    image: php-fpm
-    expose:
-        - "9000:9000"
-    volumes_from:
-        - application
-    environment:
-        XDEBUG_HOST: 192.168.1.194
-        XDEBUG_PORT: 9000
-        XDEBUG_REMOTE_MODE: req
-    links:
-        - db
-nginx:
-    image: nginx
-    ports:
-        - "80:80"
-    links:
-        - php
-    volumes_from:
-        - application
-    volumes:
-        - "logs/nginx/:/var/log/nginx"
-    hostname: symfony.dev
+version: '3.7'
+
+services:
+
+    db:
+        image: mysql
+        command: ["--default-authentication-plugin=mysql_native_password"]
+        ports:
+            - 3306:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    php:
+        build: ./docker/container/php-fpm
+        ports:
+            - 9000:9001
+        volumes:
+            - ./laravel:/var/www/laravel:cached
+            - ./docker/logs/laravel:/var/www/laravel/storage/logs:cached
+        links:
+            - db
+
+    nginx:
+        build: ./docker/container/nginx
+        ports:
+            - 80:80
+        links:
+            - php
+            - node_client
+        volumes:
+            - ./docker/logs/nginx:/var/log/nginx:cached
+            - ./laravel:/var/www/laravel:cached
+            - ./node/client:/var/www/node_client
+
+    node_client:
+        build: ./node/client
+        volumes:
+            - ./node/client:/var/www/node_client
+            - ./node/client/node_modules:/var/www/node_client/node_modules
+        ports:
+            - 3001:3000
+        environment:
+            - NODE_ENV=development
