@@ -15,11 +15,12 @@ services:
 
     php:
         build: ./docker/container/php-fpm
+        # command: sh -c 'cd /var/www/symfony composer install'
         ports:
             - 9000:9001
         volumes:
-            - ./laravel:/var/www/laravel:cached
-            - ./docker/logs/laravel:/var/www/laravel/storage/logs:cached
+            - ./symfony:/var/www/symfony:cached
+            - ./docker/logs/symfony:/var/www/symfony/var/log:cached
         links:
             - db
 
@@ -29,17 +30,18 @@ services:
             - 80:80
         links:
             - php
-            - node_client
+            - react
         volumes:
             - ./docker/logs/nginx:/var/log/nginx:cached
-            - ./laravel:/var/www/laravel:cached
-            - ./node/client:/var/www/node_client
+            - ./symfony:/var/www/symfony:cached
+            - ./react:/var/www/react
 
-    node_client:
-        build: ./node/client
+    react:
+        build: ./react
+        # command: sh -c 'cd /var/www/react npm install' #sh -c 'cd /var/www/react npm run-script build'
         volumes:
-            - ./node/client:/var/www/node_client
-            - ./node/client/node_modules:/var/www/node_client/node_modules
+            - ./react:/var/www/react
+            - ./react/node_modules:/var/www/react/node_modules
         ports:
             - 3001:3000
         environment:
