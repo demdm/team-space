@@ -5,5 +5,7 @@
 /.env.*.local
 /public/bundles/
 /var/
+!/var/log/.gitkeep
+!/var/cache/.gitkeep
 /vendor/
 ###< symfony/framework-bundle ###

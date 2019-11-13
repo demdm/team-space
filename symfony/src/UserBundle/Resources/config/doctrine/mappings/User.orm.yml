@@ -1,0 +1,25 @@
+App\UserBundle\Entity\User:
+    type: entity
+    table: user
+    repositoryClass: App\UserBundle\Repository\DoctrineUserRepository
+    uniqueConstraints:
+        unq__email:
+            columns: [ email ]
+    id:
+        id:
+            type: string
+    fields:
+        email:
+            type: string
+        password:
+            type: string
+        authToken:
+            type: string
+            nullable: true
+        authRefreshToken:
+            type: string
+            nullable: true
+        authStatus:
+            type: integer
+        isEmailConfirmed:
+            type: boolean

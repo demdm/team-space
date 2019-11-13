@@ -1,0 +1,12 @@
+App\UserBundle\Service\User\LoginRequest:
+    properties:
+        email:
+            - NotBlank: ~
+            - Email: ~
+            - Length:
+                  max: 255
+        password:
+            - NotBlank: ~
+            - Length:
+                  min: 6
+                  max: 255

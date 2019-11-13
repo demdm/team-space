@@ -15,12 +15,10 @@ services:
 
     php:
         build: ./docker/container/php-fpm
-        # command: sh -c 'cd /var/www/symfony composer install'
         ports:
             - 9000:9001
         volumes:
-            - ./symfony:/var/www/symfony:cached
-            - ./docker/logs/symfony:/var/www/symfony/var/log:cached
+            - ./php:/var/www/php:cached
         links:
             - db
 
@@ -33,7 +31,7 @@ services:
             - react
         volumes:
             - ./docker/logs/nginx:/var/log/nginx:cached
-            - ./symfony:/var/www/symfony:cached
+            - ./php:/var/www/php:cached
             - ./react:/var/www/react
 
     react:

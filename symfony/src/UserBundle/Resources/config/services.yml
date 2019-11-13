@@ -1,0 +1,22 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\UserBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
+#    App\UserBundle\EventSubscriber\:
+#        resource: '../../EventSubscriber'
+#        tags: ['kernel.event_subscriber']
+
+    App\UserBundle\Service\User\CreateService: ~
+    App\UserBundle\Service\User\LoginService: ~
+    App\UserBundle\Service\User\PasswordChecker: ~
+
+    App\UserBundle\Repository\UserRepository: '@App\UserBundle\Repository\DoctrineUserRepository'
+    App\UserBundle\Repository\DoctrineUserRepository:
+        factory: ['@doctrine', getRepository]
+        arguments:
+            - App\UserBundle\Entity\User

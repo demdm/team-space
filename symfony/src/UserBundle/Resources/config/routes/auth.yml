@@ -1,0 +1,19 @@
+user_auth_register:
+    path: /register
+    controller: App\UserBundle\Controller\AuthController::register
+    methods: [POST]
+
+user_auth_login:
+    path: /login
+    controller: App\UserBundle\Controller\AuthController::login
+    methods: [POST]
+
+user_auth_logout:
+    path: /logout
+    controller: App\UserBundle\Controller\AuthController::logout
+    methods: [GET]
+
+user_auth_user:
+    path: /user
+    controller: App\UserBundle\Controller\AuthController::user
+    methods: [POST]

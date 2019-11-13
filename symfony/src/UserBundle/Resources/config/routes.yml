@@ -1,0 +1,3 @@
+user_auth:
+    resource: 'routes/auth.yml'
+    prefix: /auth
