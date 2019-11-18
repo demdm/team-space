@@ -6,7 +6,15 @@ import {
     PageHeader,
     Button,
     Modal,
+    Row,
+    Col,
+    Layout,
+    Menu,
 } from 'antd';
+import Router from "./Router";
+import {Link} from "react-router-dom";
+
+const { Header, Content, Footer } = Layout;
 
 class App extends React.Component {
     state = { visible: false };
@@ -33,23 +41,30 @@ class App extends React.Component {
 
     render() {
         return (
-            <div className="App">
-                <div>
-                    <PageHeader
-                        ghost={false}
-                        onBack={() => window.history.back()}
-                        title="Title"
-                        subTitle="This is a subtitle"
-                        extra={[
-                            <Button key="1" type="primary" onClick={this.showModalLoginForm}>Open Modal</Button>,
-                        ]}
-                    >
-                    </PageHeader>
-                </div>
+            <Layout>
+                <PageHeader
+                    ghost={false}
+                    // onBack={() => window.history.back()}
+                    title="Title"
+                    // subTitle="This is a subtitle"
+                    extra={[
+                        <Button key="1">
+                            <Link to="/register">Registration</Link>
+                        </Button>,
+                        <Button key="2" type="primary" onClick={this.showModalLoginForm}>
+                            Login
+                        </Button>,
+                    ]}
+                >
+                </PageHeader>
 
+
+                <Content>
+                    <Router/>
+                </Content>
                 <Modal
                     title="Login"
-                    width="max-content"
+                    // width="max-content"
                     footer={null}
                     visible={this.state.visible}
                     onOk={this.loginFormModalOnOk}
@@ -57,7 +72,8 @@ class App extends React.Component {
                 >
                     <LoginForm/>
                 </Modal>
-            </div>
+
+            </Layout>
         );
     }
 }
