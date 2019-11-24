@@ -3,13 +3,12 @@ import {Col, Container, Row} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import * as Yup from 'yup';
 import CommonForm from './../../components/common/Form';
+import { login } from './../../actions';
+import { connect } from "react-redux";
 
-let Register = () => {
+let Login = props => {
+
     const Schema = Yup.object().shape({
-        name: Yup.string()
-            .min(2, 'Too Short!')
-            .max(100, 'Too Long!')
-            .required('Required'),
         email: Yup.string()
             .email('Invalid email')
             .required('Required'),
@@ -20,11 +19,6 @@ let Register = () => {
     });
 
     const Fields = [
-        {
-            name: 'name',
-            type: 'text',
-            label: 'Name',
-        },
         {
             name: 'email',
             type: 'email',
@@ -43,19 +37,17 @@ let Register = () => {
                 <Row>
                     <Col md={{ span: 6, offset: 3 }} lg={{ span: 4, offset: 4 }}>
                         <br/>
-                        <h1 align={'center'}>Registration</h1>
+                        <h1 align={'center'}>Login</h1>
                         <br/>
                         <Card style={{ width: '100%' }}>
                             <Card.Body>
                                 <CommonForm
                                     schema={Schema}
                                     fields={Fields}
-                                    url='/auth/register'
-                                    submit_text='Register'
-                                    on_success_cb={() => {
-                                        console.log('Registered')
-                                    }}
-                                    success_message={'You registered successful!'}
+                                    url='/auth/login'
+                                    submit_text='Login'
+                                    on_success_cb={props.onSuccessCallBack}
+                                    success_message={props.name + ', you logged in successful!'}
                                 />
                             </Card.Body>
                         </Card>
@@ -66,4 +58,15 @@ let Register = () => {
     );
 };
 
-export default Register;
+const mapStateToProps = state => ({
+    name: (state.auth.length ? state.auth[state.auth.length - 1]["name"] : null),
+});
+
+const mapDispatchToProps = dispatch => ({
+    onSuccessCallBack: data => dispatch(login(data.token, data.name)),
+});
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Login);

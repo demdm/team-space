@@ -4,10 +4,22 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {BrowserRouter} from "react-router-dom";
+import { Provider } from 'react-redux'
+import rootReducer from './reducers/index'
+import {createStore} from "redux";
+
+
+window.axios = require('axios');
+window.axios.api = 'http://api.localhost';
+// window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+const store = createStore(rootReducer);
 
 ReactDOM.render(
     <BrowserRouter>
-        <App />
+        <Provider store={store}>
+            <App />
+        </Provider>
     </BrowserRouter>,
     document.getElementById('root')
 );

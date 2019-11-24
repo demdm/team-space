@@ -1,11 +1,11 @@
 import React from 'react';
-import './Home.css';
+import Container from "react-bootstrap/Container";
 
 let Home = () => {
     return (
-        <div id="page-home">
+        <Container>
             Home page
-        </div>
+        </Container>
     );
 };
 

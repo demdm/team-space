@@ -1,81 +1,65 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import "antd/dist/antd.css";
-import LoginForm from './LoginForm';
-import {
-    PageHeader,
-    Button,
-    Modal,
-    Row,
-    Col,
-    Layout,
-    Menu,
-} from 'antd';
 import Router from "./Router";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import {
+    Navbar,
+    Nav,
+    NavDropdown,
+} from 'react-bootstrap';
+import {connect} from "react-redux";
 
-const { Header, Content, Footer } = Layout;
+const App = (props) => {
+    return (
+        <>
+            <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+                <div className="container">
+                    <Link to='/' className="navbar-brand">
+                        Site name
+                    </Link>
+                    <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                    <Navbar.Collapse id="responsive-navbar-nav">
+                        <Nav className="mr-auto">
+                            <Nav.Link href="#features">Features</Nav.Link>
+                            <Nav.Link href="#pricing">Pricing</Nav.Link>
+                            <NavDropdown title="Dropdown" id="collasible-nav-dropdown">
+                                <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                                <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
+                                <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                                <NavDropdown.Divider />
+                                <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
+                            </NavDropdown>
+                        </Nav>
+                        <Nav>
+                            { props.name
+                                ? (
+                                    <Link to='/logout' className="nav-link default" role="button">
+                                        Logout
+                                    </Link>
+                                ) : (<>
+                                    < Link to = '/login' className="nav-link default" role="button">
+                                        Login
+                                    </Link>
+                                    <Link to='/register' className="nav-link" role="button">
+                                        Register
+                                    </Link>
+                                </>)
+                            }
+                        </Nav>
+                    </Navbar.Collapse>
+                </div>
+            </Navbar>
 
-class App extends React.Component {
-    state = { visible: false };
+            <Router/>
+        </>
+    );
+};
 
-    showModalLoginForm = () => {
-        this.setState({
-            visible: true,
-        });
+const mapStateToProps = state => {
+    return {
+        name: (state.auth.length ? state.auth[state.auth.length - 1]["name"] : null),
     };
+};
 
-    loginFormModalOnOk = e => {
-        console.log(e);
-        this.setState({
-            visible: false,
-        });
-    };
-
-    loginFormModalOnCancel = e => {
-        console.log(e);
-        this.setState({
-            visible: false,
-        });
-    };
-
-    render() {
-        return (
-            <Layout>
-                <PageHeader
-                    ghost={false}
-                    // onBack={() => window.history.back()}
-                    title="Title"
-                    // subTitle="This is a subtitle"
-                    extra={[
-                        <Button key="1">
-                            <Link to="/register">Registration</Link>
-                        </Button>,
-                        <Button key="2" type="primary" onClick={this.showModalLoginForm}>
-                            Login
-                        </Button>,
-                    ]}
-                >
-                </PageHeader>
-
-
-                <Content>
-                    <Router/>
-                </Content>
-                <Modal
-                    title="Login"
-                    // width="max-content"
-                    footer={null}
-                    visible={this.state.visible}
-                    onOk={this.loginFormModalOnOk}
-                    onCancel={this.loginFormModalOnCancel}
-                >
-                    <LoginForm/>
-                </Modal>
-
-            </Layout>
-        );
-    }
-}
-
-export default App;
+export default connect(mapStateToProps)(App);

@@ -37,7 +37,16 @@ class AuthServiceProvider extends ServiceProvider
             $authBearerToken = $request->bearerToken();
 
             if ($authBearerToken) {
-                return User::where('api_token', $authBearerToken)->first();
+                /** @var User $user */
+                $user = User::where('api_token', $authBearerToken)->first();
+
+                if ($user) {
+                    $user->online_at = new \DateTime();
+                    $user->is_online = false;
+                    $user->save();
+
+                    return $user;
+                }
             }
 
             return null;

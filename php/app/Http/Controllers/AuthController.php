@@ -6,164 +6,262 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use Rhumsaa\Uuid\Uuid;
 
 class AuthController extends Controller
 {
-    public function login(Request $request): array
+    private function getValidationErrors(\Illuminate\Validation\Validator $validator)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|max:100|exists:users,email',
-            'password' => 'required|min:6|max:255',
-        ]);
+        $validatorErrors = $validator->errors()->messages();
+        $errors = [];
 
-        if ($validator->fails()) {
-            return [
-                'success' => false,
-                'validation_errors' => $validator->errors(),
-                'token' => null,
-            ];
+        foreach ($validatorErrors as $name => $validatorError) {
+            if (isset($validatorError[0])) {
+                $errors[$name] =  $validatorError[0];
+            }
         }
 
-        $user = User::where('email', $request->input('email'))->first();
-
-        if (!$user || !Hash::check($request->input('password'), $user->password)) {
-            return [
-                'success' => false,
-                'validation_errors' => [],
-                'error' => 'Invalid credentials',
-                'token' => null,
-            ];
-        }
-
-        return [
-            'success' => true,
-            'error' => null,
-            'validation_errors' => [],
-            'token' => $user->api_token,
-        ];
+        return $errors;
     }
 
-    public function register(Request $request)
+    public function loginAsAnonymous(Request $request): array
     {
+        $result = [
+            'success' => false,
+            'error' => null,
+            'validation_errors' => [],
+            'token' => null,
+        ];
+
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:2|max:100',
-            'email' => 'required|unique:users|max:100',
+            'email' => 'required|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            $result['validation_errors'] = $this->getValidationErrors($validator);
+            return $result;
+        }
+
+        /** @var User $user */
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user) {
+            $result['error'] = 'Invalid credentials';
+            return $result;
+        }
+
+        if ($user->auth_status === User::AUTH_STATUS_BANNED) {
+            $result['error'] = 'User banned';
+            return $result;
+        }
+
+        $user->is_used = true;
+        $user->is_online = true;
+        $user->online_at = new \DateTime();
+        $user->save();
+
+        $result['success'] = true;
+        $result['token'] = $user->api_token;
+        return $result;
+    }
+
+    public function login(Request $request): array
+    {
+        $result = [
+            'success' => false,
+            'validation_errors' => [],
+            'error' => null,
+            'data' => null,
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|max:255',
             'password' => 'required|min:6|max:255',
         ]);
 
         if ($validator->fails()) {
-            return [
-                'success' => false,
-                'validation_errors' => $validator->errors(),
-                'error' => null,
-                'token' => null,
-            ];
+            $result['validation_errors'] = $this->getValidationErrors($validator);
+            return $result;
         }
 
-        $apiToken = Str::random(255);
+        /** @var User $user */
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user) {
+            $result['error'] = 'Invalid credentials';
+            return $result;
+        }
+
+        if (!$user->password) {
+            $result['error'] = 'User has no password. Set password or log in as anonymous.';
+            return $result;
+        }
+
+        if (!Hash::check($request->input('password'), $user->password)) {
+            $result['error'] = 'Invalid credentials';
+            return $result;
+        }
+
+        if ($user->auth_status === User::AUTH_STATUS_BANNED) {
+            $result['error'] = 'User banned';
+            return $result;
+        }
+
+        $user->is_used = true;
+        $user->is_online = true;
+        $user->online_at = new \DateTime();
+        $user->save();
+
+        $result['success'] = true;
+        $result['data'] = [
+            'name' => $user->name,
+            'token' => $user->api_token,
+        ];
+        return $result;
+    }
+
+    public function autoRegisterAsAnonymous(Request $request): array
+    {
+        $result = [
+            'success' => false,
+            'validation_errors' => [],
+            'error' => null,
+            'token' => null,
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|min:2|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            $result['validation_errors'] = $this->getValidationErrors($validator);
+            return $result;
+        }
+
+        $apiToken = Uuid::uuid4()->toString();
         $curDate = new \DateTime();
 
         $user = new User();
-        $user->name = $request->get('name');
-        $user->email = $request->get('email');
-        $user->password = Hash::make($request->get('password'));
+        $user->id = Uuid::uuid4()->toString();
+        $user->name = 'Generated name'; // todo: generate user name
+        $user->email = null;
+        $user->password = null;
         $user->api_token = $apiToken;
-        $user->is_email_confirmed = false;
-        $user->auth_status = User::AUTH_STATUS_ACTIVE;
+        $user->is_online = false;
+        $user->is_used = true;
+        $user->auth_status = User::AUTH_STATUS_ANONYMOUS;
         $user->created_at = $curDate;
         $user->updated_at = $curDate;
 
         if (!$user->save()) {
-            return [
-                'success' => false,
-                'validation_errors' => [],
-                'error' => 'Server error',
-                'token' => null,
-            ];
+            $result['error'] = 'Server error';
+            return $result;
         }
 
-        return [
-            'success' => true,
+        $result['success'] = true;
+        $result['token'] = $apiToken;
+        return $result;
+    }
+
+    public function registerAsAnonymous(Request $request)
+    {
+        $result = [
+            'success' => false,
             'validation_errors' => [],
             'error' => null,
-            'token' => $apiToken,
+            'token' => null,
         ];
-    }
 
-    public function resetPassword(Request $request)
-    {
-        $resetPasswordToken = Str::random(255);
-        $request->user()->reset_password_token = $resetPasswordToken;
-
-        if (!$request->user()->save()) {
-            return [
-                'success' => false,
-                'error' => 'Server error',
-            ];
-        }
-
-        return [
-            'success' => true,
-            'error' => null,
-        ];
-    }
-
-    public function resetPasswordConfirmation(Request $request)
-    {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'new_password' => 'required|min:6|max:255',
-            'reset_password_token' => 'required|string',
+            'name' => 'string|min:2|max:100',
+            'email' => 'unique:users|max:255',
+            'password' => 'min:6|max:255',
         ]);
 
         if ($validator->fails()) {
-            return [
-                'success' => false,
-                'validation_errors' => $validator->errors(),
-                'error' => null,
-                'token' => null,
-            ];
+            $result['validation_errors'] = $this->getValidationErrors($validator);
+            return $result;
         }
 
-        $user = User::where('email', $request->input('email'))
-            ->where('reset_password_token', $request->input('reset_password_token'))
-            ->first();
+        /** @var User $user */
+        $user = $request->user();
 
-        if (!$user) {
-            return [
-                'success' => false,
-                'error' => 'Invalid reset password url',
-                'validation_errors' => [],
-                'token' => null,
-            ];
+        if ($request->input('name')) {
+            $user->name = $request->input('name');
         }
 
-        $user->password = Hash::make($request->input('new_password'));
-        $user->reset_password_token = null;
-
-        if (!$user->save()) {
-            return [
-                'success' => false,
-                'error' => 'Server error',
-                'validation_errors' => [],
-                'token' => null,
-            ];
+        if ($request->input('email')) {
+            // todo: send email with set-password-page link
+            $user->email = $request->input('email');
         }
 
-        return [
-            'success' => true,
-            'error' => null,
-            'validation_errors' => [],
-            'token' => $user->api_token,
-        ];
+        if ($request->input('password')) {
+            $user->password = Hash::make($request->get('password'));
+        }
+
+        if ($user->wasChanged() && !$user->save()) {
+            $result['error'] = 'Server error';
+            return $result;
+        }
+
+        $result['success'] = true;
+        $result['token'] = $user->api_token;
+        return $result;
     }
 
-    public function logout(Request $request)
+    public function register(Request $request): array
     {
-        $request->user()->api_token = null;
+        sleep(2);
+        $result = [
+            'success' => false,
+            'validation_errors' => [],
+            'error' => null,
+            'data' => null,
+        ];
 
-        if (!$request->user()->save()) {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|min:2|max:100',
+            'email' => 'required|unique:users|max:255',
+            'password' => 'required|min:6|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            $result['validation_errors'] = $this->getValidationErrors($validator);
+            return $result;
+        }
+
+        $user = new User();
+        $user->id = Uuid::uuid4()->toString();
+        $user->name = $request->get('name');
+        $user->email = $request->get('email');
+        $user->password = Hash::make($request->get('password'));
+        $user->api_token = Uuid::uuid4()->toString();
+        $user->is_online = false;
+        $user->is_used = true;
+        $user->auth_status = User::AUTH_STATUS_ACTIVE;
+        $user->created_at = $user->updated_at = new \DateTime();
+
+        if (!$user->save()) {
+            $result['error'] = 'Server error';
+            return $result;
+        }
+
+        $result['success'] = true;
+        $result['data'] = [
+            'name' => $user->name,
+            'token' => $user->api_token,
+        ];
+
+        return $result;
+    }
+
+    public function logout(Request $request): array
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $user->is_online = false;
+
+        if (!$user->save()) {
             return [
                 'success' => false,
                 'error' => 'Server error',
