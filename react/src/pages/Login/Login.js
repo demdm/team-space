@@ -3,10 +3,16 @@ import {Col, Container, Row} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import * as Yup from 'yup';
 import CommonForm from './../../components/common/Form';
-import { login } from './../../actions';
-import { connect } from "react-redux";
+import {getUser, login} from './../../actions';
+import { useDispatch, useSelector } from "react-redux";
 
-let Login = props => {
+let Login = () => {
+    const dispatch = useDispatch();
+
+    dispatch(getUser());
+
+    const userName = useSelector(state => state.auth ? state.auth.name : null);
+    const onSuccessCallBack = data => dispatch(login(data.token, data.name));
 
     const Schema = Yup.object().shape({
         email: Yup.string()
@@ -32,41 +38,28 @@ let Login = props => {
     ];
 
     return (
-        <>
-            <Container>
-                <Row>
-                    <Col md={{ span: 6, offset: 3 }} lg={{ span: 4, offset: 4 }}>
-                        <br/>
-                        <h1 align={'center'}>Login</h1>
-                        <br/>
-                        <Card style={{ width: '100%' }}>
-                            <Card.Body>
-                                <CommonForm
-                                    schema={Schema}
-                                    fields={Fields}
-                                    url='/auth/login'
-                                    submit_text='Login'
-                                    on_success_cb={props.onSuccessCallBack}
-                                    success_message={props.name + ', you logged in successful!'}
-                                />
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-            </Container>
-        </>
+        <Container>
+            <Row>
+                <Col md={{ span: 6, offset: 3 }} lg={{ span: 4, offset: 4 }}>
+                    <br/>
+                    <h1 align={'center'}>Login</h1>
+                    <br/>
+                    <Card style={{ width: '100%' }}>
+                        <Card.Body>
+                            <CommonForm
+                                schema={Schema}
+                                fields={Fields}
+                                url='/auth/login'
+                                submit_text='Login'
+                                on_success_cb={onSuccessCallBack}
+                                success_message={userName + ', you logged in successful!'}
+                            />
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
     );
 };
 
-const mapStateToProps = state => ({
-    name: (state.auth.length ? state.auth[state.auth.length - 1]["name"] : null),
-});
-
-const mapDispatchToProps = dispatch => ({
-    onSuccessCallBack: data => dispatch(login(data.token, data.name)),
-});
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Login);
+export default Login;

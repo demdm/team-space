@@ -8,9 +8,17 @@ import {
     Nav,
     NavDropdown,
 } from 'react-bootstrap';
-import {connect} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {getUser} from "./actions";
+import {postHttpClient} from "./utils/httpClient";
 
-const App = (props) => {
+const App = () => {
+    const dispatch = useDispatch();
+
+    dispatch(getUser());
+
+    const userName = useSelector(state => state.auth ? state.auth.name : null);
+
     return (
         <>
             <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
@@ -32,12 +40,21 @@ const App = (props) => {
                             </NavDropdown>
                         </Nav>
                         <Nav>
-                            { props.name
+                            { userName
                                 ? (
-                                    <Link to='/logout' className="nav-link default" role="button">
-                                        Logout
-                                    </Link>
-                                ) : (<>
+                                    <a href='#' className="nav-link default" role="button" onClick={() => {
+                                        postHttpClient('auth/test')
+                                            .then(response => {
+                                                console.log(response);
+                                            })
+                                            .catch(error => {
+                                                console.log(error);
+                                            });
+                                    }}>
+                                        {userName} (Logout)
+                                    </a>
+                                )
+                                : (<>
                                     < Link to = '/login' className="nav-link default" role="button">
                                         Login
                                     </Link>
@@ -56,10 +73,4 @@ const App = (props) => {
     );
 };
 
-const mapStateToProps = state => {
-    return {
-        name: (state.auth.length ? state.auth[state.auth.length - 1]["name"] : null),
-    };
-};
-
-export default connect(mapStateToProps)(App);
+export default App;

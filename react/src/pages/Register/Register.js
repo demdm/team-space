@@ -38,32 +38,30 @@ let Register = () => {
     ];
 
     return (
-        <>
-            <Container>
-                <Row>
-                    <Col md={{ span: 6, offset: 3 }} lg={{ span: 4, offset: 4 }}>
-                        <br/>
-                        <h1 align={'center'}>Registration</h1>
-                        <br/>
-                        <Card style={{ width: '100%' }}>
-                            <Card.Body>
-                                <CommonForm
-                                    schema={Schema}
-                                    fields={Fields}
-                                    url='/auth/register'
-                                    submit_text='Register'
-                                    on_success_cb={() => {
-                                        console.log('Registered')
-                                    }}
-                                    success_message={'You registered successful!'}
-                                />
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-            </Container>
-        </>
+        <Container>
+            <Row>
+                <Col md={{ span: 6, offset: 3 }} lg={{ span: 4, offset: 4 }}>
+                    <br/>
+                    <h1 align={'center'}>Registration</h1>
+                    <br/>
+                    <Card style={{ width: '100%' }}>
+                        <Card.Body>
+                            <CommonForm
+                                schema={Schema}
+                                fields={Fields}
+                                url='/auth/register'
+                                submit_text='Register'
+                                on_success_cb={() => {
+                                    console.log('Registered')
+                                }}
+                                success_message={'You registered successful!'}
+                            />
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
     );
-};
+}
 
 export default Register;
