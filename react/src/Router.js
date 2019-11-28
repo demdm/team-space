@@ -4,8 +4,8 @@ import {
     Route
 } from "react-router-dom";
 import Home from "./pages/Home/Home";
-import Register from "./pages/Register/Register";
-import Login from "./pages/Login/Login";
+import SignUp from "./pages/Auth/SignUp";
+import SignIn from "./pages/Auth/SignIn";
 
 export default () => {
     return (
@@ -13,11 +13,11 @@ export default () => {
             <Route exact path="/">
                 <Home/>
             </Route>
-            <Route path="/register">
-                <Register/>
+            <Route path="/sign-up">
+                <SignUp/>
             </Route>
-            <Route path="/login">
-                <Login/>
+            <Route path="/sign-in">
+                <SignIn/>
             </Route>
         </Switch>
     );

@@ -8,17 +8,10 @@ import {
     Nav,
     NavDropdown,
 } from 'react-bootstrap';
-import {useDispatch, useSelector} from "react-redux";
-import {getUser} from "./actions";
-import {postHttpClient} from "./utils/httpClient";
+import HttpClient from "./services/HttpClient";
+import UserService from "./services/UserService";
 
-const App = () => {
-    const dispatch = useDispatch();
-
-    dispatch(getUser());
-
-    const userName = useSelector(state => state.auth ? state.auth.name : null);
-
+export default () => {
     return (
         <>
             <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
@@ -40,10 +33,11 @@ const App = () => {
                             </NavDropdown>
                         </Nav>
                         <Nav>
-                            { userName
+                            { UserService.isSignedIn()
                                 ? (
                                     <a href='#' className="nav-link default" role="button" onClick={() => {
-                                        postHttpClient('auth/test')
+                                        HttpClient
+                                            .preparePostRequest('auth/test')
                                             .then(response => {
                                                 console.log(response);
                                             })
@@ -51,14 +45,14 @@ const App = () => {
                                                 console.log(error);
                                             });
                                     }}>
-                                        {userName} (Logout)
+                                        { UserService.name } (Logout)
                                     </a>
                                 )
                                 : (<>
-                                    < Link to = '/login' className="nav-link default" role="button">
+                                    < Link to='/sign-in' className="nav-link default" role="button">
                                         Login
                                     </Link>
-                                    <Link to='/register' className="nav-link" role="button">
+                                    <Link to='/sign-up' className="nav-link" role="button">
                                         Register
                                     </Link>
                                 </>)
@@ -72,5 +66,3 @@ const App = () => {
         </>
     );
 };
-
-export default App;

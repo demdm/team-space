@@ -3,18 +3,13 @@ import {Col, Container, Row} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import * as Yup from 'yup';
 import CommonForm from './../../components/common/Form';
-import {getUser, login} from './../../actions';
-import { useDispatch, useSelector } from "react-redux";
 
-let Login = () => {
-    const dispatch = useDispatch();
-
-    dispatch(getUser());
-
-    const userName = useSelector(state => state.auth ? state.auth.name : null);
-    const onSuccessCallBack = data => dispatch(login(data.token, data.name));
-
+export default () => {
     const Schema = Yup.object().shape({
+        name: Yup.string()
+            .min(2, 'Too Short!')
+            .max(100, 'Too Long!')
+            .required('Required'),
         email: Yup.string()
             .email('Invalid email')
             .required('Required'),
@@ -25,6 +20,11 @@ let Login = () => {
     });
 
     const Fields = [
+        {
+            name: 'name',
+            type: 'text',
+            label: 'Name',
+        },
         {
             name: 'email',
             type: 'email',
@@ -42,17 +42,19 @@ let Login = () => {
             <Row>
                 <Col md={{ span: 6, offset: 3 }} lg={{ span: 4, offset: 4 }}>
                     <br/>
-                    <h1 align={'center'}>Login</h1>
+                    <h1 align={'center'}>Registration</h1>
                     <br/>
                     <Card style={{ width: '100%' }}>
                         <Card.Body>
                             <CommonForm
                                 schema={Schema}
                                 fields={Fields}
-                                url='/auth/login'
-                                submit_text='Login'
-                                on_success_cb={onSuccessCallBack}
-                                success_message={userName + ', you logged in successful!'}
+                                url='/auth/register'
+                                submit_text='Register'
+                                on_success_cb={() => {
+                                    console.log('Registered')
+                                }}
+                                success_message={'You registered successful!'}
                             />
                         </Card.Body>
                     </Card>
@@ -61,5 +63,3 @@ let Login = () => {
         </Container>
     );
 };
-
-export default Login;

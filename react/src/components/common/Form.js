@@ -6,19 +6,17 @@ import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
 
 let CommonForm = (props) => {
-    let schemaFieldsObj = {};
-    props.fields.forEach(field => {
-        schemaFieldsObj[field.name] = '';
-    });
+    let fields = {};
+    props.fields.forEach(field => fields[field.name] = '');
 
-    const [schemaFields] = useState(schemaFieldsObj);
+    const [initialValues] = useState(fields);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [isRequestHandling, setRequestHandling] = useState(false);
 
     return (
         <Formik
-            initialValues={schemaFields}
+            initialValues={initialValues}
             validationSchema={props.schema}
             onSubmit={(values, actions) => {
                 setRequestHandling(true);
