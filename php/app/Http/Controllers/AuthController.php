@@ -255,11 +255,6 @@ class AuthController extends Controller
         return $result;
     }
 
-    public function testAuth()
-    {
-        return ['status' => 200];
-    }
-
     public function logout(Request $request): array
     {
         /** @var User $user */

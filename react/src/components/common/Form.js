@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 import { Formik } from 'formik';
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
+import HttpClient from "../../services/HttpClient";
 
 let CommonForm = (props) => {
     let fields = {};
@@ -21,8 +22,8 @@ let CommonForm = (props) => {
             onSubmit={(values, actions) => {
                 setRequestHandling(true);
 
-                window.axios
-                    .post(window.axios.api + props.url, values)
+                HttpClient
+                    .preparePostRequest(props.url, values)
                     .then(response => {
                         setSuccess(response.data.success);
                         setError(null);
@@ -68,7 +69,7 @@ let CommonForm = (props) => {
                         </Alert>
                     }
                     {
-                        success &&
+                        success && props.success_message &&
                         <Alert variant='success'>
                             {props.success_message}
                         </Alert>

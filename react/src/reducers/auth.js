@@ -13,6 +13,8 @@ export default (state = [], action) => {
             UserService.signOut();
 
             return {};
+        case 'GET_USER':
+            return state;
         default:
             return state;
     }

@@ -3,13 +3,13 @@ import {Col, Container, Row} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import * as Yup from 'yup';
 import CommonForm from './../../components/common/Form';
-import {signIn} from './../../actions';
-import { useDispatch, useSelector } from "react-redux";
+import UserService from "../../services/UserService";
 
 export default () => {
-    const dispatch = useDispatch();
-    const userName = useSelector(state => state.auth ? state.auth.name : null);
-    const onSuccessCallBack = data => dispatch(signIn(data.token, data.name));
+    const onSuccessCallBack = data => {
+        UserService.signIn(data.token, data.name);
+        window.location.replace("/");
+    };
 
     const Schema = Yup.object().shape({
         email: Yup.string()
@@ -46,10 +46,10 @@ export default () => {
                             <CommonForm
                                 schema={Schema}
                                 fields={Fields}
-                                url='/auth/login'
+                                url='auth/login'
                                 submit_text='Login'
                                 on_success_cb={onSuccessCallBack}
-                                success_message={userName + ', you logged in successful!'}
+                                success_message={null}
                             />
                         </Card.Body>
                     </Card>

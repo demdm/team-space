@@ -18,6 +18,5 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
     $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('logout', 'AuthController@logout');
-        $router->post('test', 'AuthController@testAuth');
     });
 });

@@ -2,7 +2,7 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Router from "./Router";
-import { Link } from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 import {
     Navbar,
     Nav,
@@ -10,8 +10,16 @@ import {
 } from 'react-bootstrap';
 import HttpClient from "./services/HttpClient";
 import UserService from "./services/UserService";
+import {useDispatch, useSelector} from "react-redux";
+import {getUser, signOut} from "./actions";
 
 export default () => {
+    const history = useHistory();
+    const dispatch = useDispatch();
+
+    dispatch(getUser());
+    const userName = useSelector(state => state.auth.name) || UserService.name;
+
     return (
         <>
             <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
@@ -33,19 +41,24 @@ export default () => {
                             </NavDropdown>
                         </Nav>
                         <Nav>
-                            { UserService.isSignedIn()
+                            { userName
                                 ? (
                                     <a href='#' className="nav-link default" role="button" onClick={() => {
                                         HttpClient
-                                            .preparePostRequest('auth/test')
+                                            .preparePostRequest('auth/logout')
                                             .then(response => {
-                                                console.log(response);
+                                                if (response.data.success) {
+                                                    dispatch(signOut());
+                                                    history.replace({from: {pathname: '/'}});
+                                                } else {
+                                                    console.log(response);
+                                                }
                                             })
                                             .catch(error => {
                                                 console.log(error);
                                             });
                                     }}>
-                                        { UserService.name } (Logout)
+                                        { userName } (Logout)
                                     </a>
                                 )
                                 : (<>
