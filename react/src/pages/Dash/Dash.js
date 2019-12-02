@@ -1,10 +1,10 @@
 import React from 'react';
-import Container from "react-bootstrap/Container";
+import Layout from "../_layouts/Dash/Layout";
 
 export default () => {
     return (
-        <Container>
-            Dash user page
-        </Container>
+        <Layout>
+            <h1>Dashboard</h1>
+        </Layout>
     );
 };

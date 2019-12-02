@@ -211,7 +211,6 @@ class AuthController extends Controller
 
     public function register(Request $request): array
     {
-        sleep(2);
         $result = [
             'success' => false,
             'validation_errors' => [],

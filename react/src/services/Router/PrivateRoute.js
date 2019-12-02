@@ -11,10 +11,11 @@ export default ({ children, ...rest }) => {
     return (
         <Route
             {...rest}
-            render={({ location }) =>
-                isAuthenticated ? (
+            render={({ location }) => isAuthenticated
+                ? (
                     children
-                ) : (
+                )
+                : (
                     <Redirect
                         to={{
                             pathname: '/sign-in',

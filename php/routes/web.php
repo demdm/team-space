@@ -18,5 +18,9 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
     $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('logout', 'AuthController@logout');
+        $router->post('edit-name', 'ProfileController@editName');
+        $router->post('edit-email', 'ProfileController@editEmail');
+        $router->post('edit-password', 'ProfileController@editPassword');
+        $router->post('get-data', 'ProfileController@getData');
     });
 });

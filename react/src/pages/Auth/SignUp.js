@@ -1,42 +1,10 @@
 import React from 'react';
 import {Col, Container, Row} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
-import * as Yup from 'yup';
+import {string} from 'yup';
 import CommonForm from './../../components/common/Form';
 
 export default () => {
-    const Schema = Yup.object().shape({
-        name: Yup.string()
-            .min(2, 'Too Short!')
-            .max(100, 'Too Long!')
-            .required('Required'),
-        email: Yup.string()
-            .email('Invalid email')
-            .required('Required'),
-        password: Yup.string()
-            .min(6, 'Too Short!')
-            .max(255, 'Too Long!')
-            .required('Required'),
-    });
-
-    const Fields = [
-        {
-            name: 'name',
-            type: 'text',
-            label: 'Name',
-        },
-        {
-            name: 'email',
-            type: 'email',
-            label: 'Email',
-        },
-        {
-            name: 'password',
-            type: 'password',
-            label: 'Password',
-        },
-    ];
-
     return (
         <Container>
             <Row>
@@ -47,8 +15,38 @@ export default () => {
                     <Card style={{ width: '100%' }}>
                         <Card.Body>
                             <CommonForm
-                                schema={Schema}
-                                fields={Fields}
+                                enable_auto_focus={true}
+                                enable_reset_form_on_success={true}
+                                schema={{
+                                    name: string()
+                                        .min(2, 'Too Short!')
+                                        .max(100, 'Too Long!')
+                                        .required('Required'),
+                                    email: string()
+                                        .email('Invalid email')
+                                        .required('Required'),
+                                    password: string()
+                                        .min(6, 'Too Short!')
+                                        .max(255, 'Too Long!')
+                                        .required('Required'),
+                                }}
+                                fields={[
+                                    {
+                                        name: 'name',
+                                        type: 'text',
+                                        label: 'Name',
+                                    },
+                                    {
+                                        name: 'email',
+                                        type: 'email',
+                                        label: 'Email',
+                                    },
+                                    {
+                                        name: 'password',
+                                        type: 'password',
+                                        label: 'Password',
+                                    },
+                                ]}
                                 url='/auth/register'
                                 submit_text='Register'
                                 on_success_cb={() => {

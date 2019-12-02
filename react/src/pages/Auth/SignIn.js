@@ -1,25 +1,25 @@
 import React from 'react';
 import {Col, Container, Row} from "react-bootstrap";
 import Card from "react-bootstrap/Card";
-import * as Yup from 'yup';
+import {string} from 'yup';
 import CommonForm from './../../components/common/Form';
 import UserService from "../../services/UserService";
 
 export default () => {
     const onSuccessCallBack = data => {
         UserService.signIn(data.token, data.name);
-        window.location.replace("/");
+        window.location.replace("/user/dash");
     };
 
-    const Schema = Yup.object().shape({
-        email: Yup.string()
+    const Schema = {
+        email: string()
             .email('Invalid email')
             .required('Required'),
-        password: Yup.string()
+        password: string()
             .min(6, 'Too Short!')
             .max(255, 'Too Long!')
             .required('Required'),
-    });
+    };
 
     const Fields = [
         {
@@ -44,6 +44,8 @@ export default () => {
                     <Card style={{ width: '100%' }}>
                         <Card.Body>
                             <CommonForm
+                                enable_auto_focus={true}
+                                enable_reset_form_on_success={true}
                                 schema={Schema}
                                 fields={Fields}
                                 url='auth/login'

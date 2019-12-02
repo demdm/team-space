@@ -11,15 +11,16 @@ export default ({ children, ...rest }) => {
     return (
         <Route
             {...rest}
-            render={({ location }) =>
-                isAuthenticated ? (
+            render={({ location }) => isAuthenticated
+                ? (
                     <Redirect
                         to={{
                             pathname: '/',
                             state: { from: location }
                         }}
                     />
-                ) : (
+                )
+                : (
                     children
                 )
             }

@@ -62,7 +62,7 @@ export default () => {
                                     </a>
                                 )
                                 : (<>
-                                    < Link to='/sign-in' className="nav-link default" role="button">
+                                    <Link to='/sign-in' className="nav-link default" role="button">
                                         Login
                                     </Link>
                                     <Link to='/sign-up' className="nav-link" role="button">

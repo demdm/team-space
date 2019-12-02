@@ -3,12 +3,13 @@ import {
     Switch,
     Route,
 } from 'react-router-dom';
-import PublicRoute from "./services/Router/PublicRoute";
-import PrivateRoute from "./services/Router/PrivateRoute";
+import PublicRoute from './services/Router/PublicRoute';
+import PrivateRoute from './services/Router/PrivateRoute';
 import Home from './pages/Home/Home';
 import SignUp from './pages/Auth/SignUp';
 import SignIn from './pages/Auth/SignIn';
 import Dash from './pages/Dash/Dash';
+import Profile from './pages/Dash/Profile';
 
 export default () => {
     return (
@@ -16,14 +17,17 @@ export default () => {
             <Route exact path='/'>
                 <Home/>
             </Route>
-            <PublicRoute path='/sign-up'>
+            <PublicRoute exact path='/sign-up'>
                 <SignUp/>
             </PublicRoute>
-            <PublicRoute path='/sign-in'>
+            <PublicRoute exact path='/sign-in'>
                 <SignIn/>
             </PublicRoute>
-            <PrivateRoute path='/dash'>
+            <PrivateRoute exact path='/user/dash'>
                 <Dash/>
+            </PrivateRoute>
+            <PrivateRoute exact path='/user/profile'>
+                <Profile/>
             </PrivateRoute>
         </Switch>
     );
