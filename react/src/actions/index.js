@@ -11,3 +11,8 @@ export const signOut = () => ({
 export const getUser = () => ({
     type: 'GET_USER',
 });
+
+export const changeName = name => ({
+    type: 'CHANGE_NAME',
+    name,
+});

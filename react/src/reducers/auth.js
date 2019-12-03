@@ -15,6 +15,12 @@ export default (state = [], action) => {
             return {};
         case 'GET_USER':
             return state;
+        case 'CHANGE_NAME':
+            UserService.name = action.name;
+
+            state.name = action.name;
+
+            return state;
         default:
             return state;
     }

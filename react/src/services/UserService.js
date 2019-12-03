@@ -29,6 +29,14 @@ export default {
     },
 
     /**
+     * @param {string} name
+     * @returns {void}
+     */
+    set name(name) {
+        localStorage.setItem(this.nameKeyName, name);
+    },
+
+    /**
      * @param {string} token
      * @param {string} name
      */

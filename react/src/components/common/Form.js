@@ -1,4 +1,7 @@
-import React, {useState} from 'react';
+import React, {
+    useEffect,
+    useState,
+} from 'react';
 import {
     Form,
     Button,
@@ -11,9 +14,10 @@ import {object} from "yup";
 
 export default (props) => {
     let fields = {};
-    props.fields.forEach(field => fields[field.name] = field.value || '');
 
-    const [initialValues] = useState(fields);
+    const [initialValues, setInitialValues] = useState(fields);
+    const [currentValues, setCurrentValues] = useState(fields);
+    const [info, setInfo] = useState(null);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [isRequestHandling, setRequestHandling] = useState(false);
@@ -21,11 +25,31 @@ export default (props) => {
     const enableResetFormOnSuccess = props.enable_reset_form_on_success === true;
     const schema = object().shape(props.schema);
 
+    useEffect(() => {
+        props.fields.forEach(field => fields[field.name] = field.value);
+        setInitialValues(fields);
+        setCurrentValues(fields);
+    }, [
+        props,
+    ]);
+
     return (
         <Formik
+            enableReinitialize
             initialValues={initialValues}
             validationSchema={schema}
             onSubmit={(values, actions) => {
+                setInfo(null);
+                setError(null);
+                setSuccess(false);
+
+                // no changes
+                if (JSON.stringify(values) === JSON.stringify(currentValues)) {
+                    setInfo('Nothing has changed');
+                    return;
+                }
+
+                // start request
                 setRequestHandling(true);
 
                 HttpClient
@@ -50,14 +74,17 @@ export default (props) => {
                             }
 
                             if (typeof props.on_success_cb === 'function') {
-                                props.on_success_cb(response.data.data);
+                                props.on_success_cb(response.data, values);
                             }
+
+                            setCurrentValues(values);
                         }
                     })
                     .catch(error => {
                         console.log(error);
                         setError('Unknown error');
                     }).finally(()  => {
+                        // finish request
                         setRequestHandling(false);
                     });
             }}
@@ -72,6 +99,12 @@ export default (props) => {
                   errors,
             }) => (
                 <Form noValidate onSubmit={handleSubmit}>
+                    {
+                        info &&
+                        <Alert variant='info'>
+                            {info}
+                        </Alert>
+                    }
                     {
                         error &&
                         <Alert variant='danger'>
@@ -93,7 +126,7 @@ export default (props) => {
                                     autoFocus={ enableAutoFocus && key === 0 }
                                     type={ field.type }
                                     name={ field.name }
-                                    value={ values[field.name] || field.value || '' } // костляка, исправить!!!
+                                    value={ values[field.name] || '' }
                                     onChange={ handleChange }
                                     onBlur={ handleBlur }
                                     isInvalid={ !!touched[field.name] && !!errors[field.name] }
