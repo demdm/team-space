@@ -38,8 +38,6 @@ class Cors
                 return $next($request)
                     ->header('Access-Control-Allow-Origin', $request->headers->get('origin'))
                     ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-//                    ->header('Access-Control-Allow-Credentials', 'true')
-//                    ->header('Access-Control-Max-Age', '86400')
                     ->header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, X-Token-Auth, Authorization')
                 ;
             }

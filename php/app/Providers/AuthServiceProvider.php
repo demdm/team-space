@@ -42,7 +42,7 @@ class AuthServiceProvider extends ServiceProvider
 
                 if ($user) {
                     $user->online_at = new \DateTime();
-                    $user->is_online = false;
+                    $user->is_online = true;
                     $user->save();
 
                     return $user;
