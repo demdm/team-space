@@ -51,11 +51,6 @@ class AuthController extends Controller
             return $result;
         }
 
-        if (!$user->password) {
-            $result['error'] = 'User has no password. Set password or log in as anonymous.';
-            return $result;
-        }
-
         if (!Hash::check($request->input('password'), $user->password)) {
             $result['error'] = 'Invalid credentials';
             return $result;
@@ -66,7 +61,11 @@ class AuthController extends Controller
             return $result;
         }
 
-        $user->is_used = true;
+        if ($user->auth_status === User::AUTH_STATUS_FIRED) {
+            $result['error'] = 'User fired';
+            return $result;
+        }
+
         $user->is_online = true;
         $user->online_at = new \DateTime();
         $user->save();
@@ -104,11 +103,16 @@ class AuthController extends Controller
         $user->name = $request->get('name');
         $user->email = $request->get('email');
         $user->password = Hash::make($request->get('password'));
-        $user->api_token = Uuid::uuid4()->toString();
-        $user->is_online = false;
-        $user->is_used = true;
+        $user->position = 'HR manager';
+        $user->api_token = md5(uniqid($request->get('email') . time(), true));
+        $user->role = User::ROLE_HR_MANAGER;
         $user->auth_status = User::AUTH_STATUS_ACTIVE;
-        $user->created_at = $user->updated_at = new \DateTime();
+        $user->presence_status = User::PRESENCE_STATUS_WORK;
+        $user->work_type = User::WORK_TYPE_OFFICE;
+        $user->is_email_confirmed = false;
+        $user->is_online = false;
+        $user->created_at = new \DateTime();
+        $user->updated_at = new \DateTime();
 
         if (!$user->save()) {
             $result['error'] = 'Server error';

@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -97,7 +98,7 @@ class ProfileController extends Controller
         ];
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|unique:users|max:255',
+            'password' => 'required|min:6|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -119,6 +120,43 @@ class ProfileController extends Controller
         return $result;
     }
 
+    public function editPosition(Request $request)
+    {
+        $result = [
+            'success' => false,
+            'validation_errors' => [],
+            'error' => null,
+            'data' => null,
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'role' => [
+                'required',
+                Rule::in(array_keys(User::ROLES)),
+            ],
+            'position' => 'string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            $result['validation_errors'] = $this->getValidationErrors($validator);
+            return $result;
+        }
+
+        /** @var User $user */
+        $user = $request->user();
+        $user->position = $request->get('position');
+        $user->role = $request->get('role');
+
+        if (!$user->save()) {
+            $result['error'] = 'Server error';
+            return $result;
+        }
+
+        $result['success'] = true;
+
+        return $result;
+    }
+
     public function getData(Request $request)
     {
         /** @var User $user */
@@ -127,6 +165,9 @@ class ProfileController extends Controller
         return [
             'name' => $user->name,
             'email' => $user->email,
+            'position' => $user->position,
+            'role' => $user->role,
+            'roles' => User::ROLES,
         ];
     }
 }

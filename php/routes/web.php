@@ -15,9 +15,15 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
     $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->post('logout', 'AuthController@logout');
+    });
+});
+
+$router->group(['prefix' => 'user', 'middleware' => 'auth'], function () use ($router) {
+    $router->group(['prefix' => 'profile'], function () use ($router) {
         $router->post('edit-name', 'ProfileController@editName');
         $router->post('edit-email', 'ProfileController@editEmail');
         $router->post('edit-password', 'ProfileController@editPassword');
+        $router->post('edit-position', 'ProfileController@editPosition');
         $router->post('get-data', 'ProfileController@getData');
     });
 });

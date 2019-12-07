@@ -16,6 +16,9 @@ export default () => {
     const dispatch = useDispatch();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [position, setPosition] = useState('');
+    const [role, setRole] = useState('');
+    const [roleOptions, setRoleOptions] = useState({});
 
     const onEmailEditedSuccessCb = (response, values) => {
         dispatch(changeName(values.name));
@@ -23,10 +26,13 @@ export default () => {
 
     useEffect(() => {
         HttpClient
-            .preparePostRequest('auth/get-data')
+            .preparePostRequest('user/profile/get-data')
             .then(response => {
                 setName(response.data.name);
                 setEmail(response.data.email);
+                setPosition(response.data.position);
+                setRole(response.data.role);
+                setRoleOptions(response.data.roles);
             })
             .catch(error => {
                 console.log(error);
@@ -50,6 +56,9 @@ export default () => {
                             <Nav.Item>
                                 <Nav.Link eventKey="password">Password</Nav.Link>
                             </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="position">Position</Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </Col>
                     <Col sm={9}>
@@ -68,7 +77,7 @@ export default () => {
                                         label: 'Name',
                                         value: name,
                                     }]}
-                                    url='auth/edit-name'
+                                    url='user/profile/edit-name'
                                     submit_text='Save'
                                     success_message='Name updated!'
                                     on_success_cb={onEmailEditedSuccessCb}
@@ -87,7 +96,7 @@ export default () => {
                                         label: 'Email',
                                         value: email
                                     }]}
-                                    url='auth/edit-email'
+                                    url='user/profile/edit-email'
                                     submit_text='Save'
                                     success_message='Email updated!'
                                 />
@@ -105,9 +114,39 @@ export default () => {
                                         type: 'password',
                                         label: 'New password',
                                     }]}
-                                    url='auth/edit-password'
+                                    url='user/profile/edit-password'
                                     submit_text='Save'
                                     success_message='Password updated!'
+                                />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey="position">
+                                <CommonForm
+                                    schema={{
+                                        role: string()
+                                            .oneOf(Object.keys(roleOptions))
+                                            .required(),
+                                        position: string()
+                                            .min(0, 'Too Short!')
+                                            .max(255, 'Too Long!'),
+                                    }}
+                                    fields={[
+                                        {
+                                            name: 'role',
+                                            type: 'select',
+                                            options: roleOptions,
+                                            label: 'Position name',
+                                            value: role,
+                                        },
+                                        {
+                                            name: 'position',
+                                            type: 'text',
+                                            label: 'Position description',
+                                            value: position,
+                                        },
+                                    ]}
+                                    url='user/profile/edit-position'
+                                    submit_text='Save'
+                                    success_message='Position data updated!'
                                 />
                             </Tab.Pane>
                         </Tab.Content>

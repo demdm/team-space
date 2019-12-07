@@ -33,6 +33,14 @@ export default (props) => {
 
     const schema = object().shape(props.schema);
 
+    const hideAllMessages = (timeout = 2000) => {
+        setTimeout(() => {
+            setInfo(null);
+            setError(null);
+            setSuccess(null);
+        }, timeout);
+    };
+
     useEffect(() => {
         let fields = {};
         props.fields.forEach(field => fields[field.name] = field.value);
@@ -55,10 +63,10 @@ export default (props) => {
 
                 if (areObjectsEqual(values, currentValues)) {
                     setInfo('Nothing has been changed');
+                    hideAllMessages();
                     return;
                 }
 
-                // start request
                 setRequestHandling(true);
 
                 HttpClient
@@ -94,6 +102,7 @@ export default (props) => {
                         setError('Unknown error');
                     }).finally(()  => {
                         setRequestHandling(false);
+                        hideAllMessages();
                     });
             }}
         >
@@ -126,25 +135,51 @@ export default (props) => {
                         </Alert>
                     }
 
-                    {props.fields.map((field, key) => {
-                        return (
-                            <Form.Group controlId={field.name + '_' + key} key={key}>
-                                <Form.Label>{ field.label }</Form.Label>
+                    {props.fields.map((field, key) => (
+                        <Form.Group controlId={field.name + '_' + key} key={key}>
+                            <Form.Label>{ field.label }</Form.Label>
+
+                            {/* TEXT */}
+                            {['text', 'email', 'password'].includes(field.type) &&
                                 <Form.Control
-                                    autoFocus={ enableAutoFocus && key === 0 }
-                                    type={ field.type }
-                                    name={ field.name }
-                                    value={ values[field.name] || '' }
-                                    onChange={ handleChange }
-                                    onBlur={ handleBlur }
-                                    isInvalid={ !!touched[field.name] && !!errors[field.name] }
+                                    autoFocus={enableAutoFocus && key === 0}
+                                    type={field.type}
+                                    name={field.name}
+                                    value={values[field.name] || ''}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    isInvalid={!!touched[field.name] && !!errors[field.name]}
                                 />
-                                <Form.Control.Feedback type="invalid">
-                                    {errors[field.name]}
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                        )
-                    })}
+                            }
+
+                            {/* SELECT */}
+                            {field.type === 'select' && field.options &&
+                                <Form.Control
+                                    as="select"
+                                    name={field.name}
+                                    value={values[field.name]}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    isInvalid={!!touched[field.name] && !!errors[field.name]}
+                                >
+                                    {
+                                        Object.keys(field.options).map((value, key) => (
+                                            <option
+                                                key={key}
+                                                value={value}
+                                            >
+                                                {field.options[value]}
+                                            </option>
+                                        ))
+                                    }
+                                </Form.Control>
+                            }
+
+                            <Form.Control.Feedback type="invalid">
+                                {errors[field.name]}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                    ))}
 
                     { isRequestHandling
                         ?
