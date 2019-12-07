@@ -11,22 +11,32 @@ import {
 import { Formik } from 'formik';
 import HttpClient from "../../services/HttpClient";
 import {object} from "yup";
+import {areObjectsEqual} from "../../helpers/object";
 
 export default (props) => {
-    let fields = {};
 
-    const [initialValues, setInitialValues] = useState(fields);
-    const [currentValues, setCurrentValues] = useState(fields);
+    // values
+    const [initialValues, setInitialValues] = useState({});
+    const [currentValues, setCurrentValues] = useState({});
+
+    // message
     const [info, setInfo] = useState(null);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
+    const [success, setSuccess] = useState(null);
+
+    // statuses
     const [isRequestHandling, setRequestHandling] = useState(false);
+
+    // form settings
     const enableAutoFocus = props.enable_auto_focus === true;
     const enableResetFormOnSuccess = props.enable_reset_form_on_success === true;
+
     const schema = object().shape(props.schema);
 
     useEffect(() => {
+        let fields = {};
         props.fields.forEach(field => fields[field.name] = field.value);
+
         setInitialValues(fields);
         setCurrentValues(fields);
     }, [
@@ -41,11 +51,10 @@ export default (props) => {
             onSubmit={(values, actions) => {
                 setInfo(null);
                 setError(null);
-                setSuccess(false);
+                setSuccess(null);
 
-                // no changes
-                if (JSON.stringify(values) === JSON.stringify(currentValues)) {
-                    setInfo('Nothing has changed');
+                if (areObjectsEqual(values, currentValues)) {
+                    setInfo('Nothing has been changed');
                     return;
                 }
 
@@ -81,10 +90,9 @@ export default (props) => {
                         }
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.error(error);
                         setError('Unknown error');
                     }).finally(()  => {
-                        // finish request
                         setRequestHandling(false);
                     });
             }}

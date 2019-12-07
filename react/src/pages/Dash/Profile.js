@@ -9,7 +9,6 @@ import {
     Nav,
 } from "react-bootstrap";
 import HttpClient from "../../services/HttpClient";
-import UserService from "../../services/UserService";
 import {useDispatch} from "react-redux";
 import {changeName} from "../../actions";
 
