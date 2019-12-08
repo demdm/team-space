@@ -1,6 +1,9 @@
 export default {
 
     /** @var {string} */
+    idKeyName: 'id',
+
+    /** @var {string} */
     tokenKeyName: 'token',
 
     /** @var {string} */
@@ -11,6 +14,7 @@ export default {
      */
     isSignedIn: function () {
         return localStorage.getItem(this.tokenKeyName) !== null
+            && localStorage.getItem(this.idKeyName) !== null
             && localStorage.getItem(this.nameKeyName) !== null;
     },
 
@@ -37,10 +41,19 @@ export default {
     },
 
     /**
+     * @returns {string}|{null}
+     */
+    get id() {
+        return localStorage.getItem(this.idKeyName);
+    },
+
+    /**
+     * @param {string} id
      * @param {string} token
      * @param {string} name
      */
-    signIn: function (token, name) {
+    signIn: function (id, token, name) {
+        localStorage.setItem(this.idKeyName, id);
         localStorage.setItem(this.tokenKeyName, token);
         localStorage.setItem(this.nameKeyName, name);
     },
@@ -49,6 +62,7 @@ export default {
      * @return {void}
      */
     signOut: function () {
+        localStorage.removeItem(this.idKeyName);
         localStorage.removeItem(this.tokenKeyName);
         localStorage.removeItem(this.nameKeyName);
     },

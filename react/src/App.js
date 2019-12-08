@@ -47,15 +47,16 @@ export default () => {
                                         HttpClient
                                             .preparePostRequest('auth/logout')
                                             .then(response => {
-                                                if (response.data.success) {
-                                                    dispatch(signOut());
-                                                    history.replace({from: {pathname: '/'}});
-                                                } else {
+                                                if (!response.data.success) {
                                                     console.log(response);
                                                 }
                                             })
                                             .catch(error => {
                                                 console.log(error);
+                                            })
+                                            .finally(() => {
+                                                dispatch(signOut());
+                                                history.replace({from: {pathname: '/'}});
                                             });
                                     }}>
                                         { userName } (Logout)

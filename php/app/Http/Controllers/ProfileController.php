@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Company;
+use App\CompanyHasUsers;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -80,10 +83,9 @@ class ProfileController extends Controller
 
         if (!$user->save()) {
             $result['error'] = 'Server error';
-            return $result;
+        } else {
+            $result['success'] = true;
         }
-
-        $result['success'] = true;
 
         return $result;
     }
@@ -112,10 +114,9 @@ class ProfileController extends Controller
 
         if (!$user->save()) {
             $result['error'] = 'Server error';
-            return $result;
+        } else {
+            $result['success'] = true;
         }
-
-        $result['success'] = true;
 
         return $result;
     }
@@ -149,10 +150,80 @@ class ProfileController extends Controller
 
         if (!$user->save()) {
             $result['error'] = 'Server error';
+        } else {
+            $result['success'] = true;
+        }
+
+        return $result;
+    }
+
+    public function editCompany(Request $request)
+    {
+        $result = [
+            'success' => false,
+            'validation_errors' => [],
+            'error' => null,
+            'data' => null,
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'company_name' => 'string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            $result['validation_errors'] = $this->getValidationErrors($validator);
             return $result;
         }
 
-        $result['success'] = true;
+        /** @var User $user */
+        $user = $request->user();
+
+        $companyId = $request->get('id');
+        $companyHasUsers = null;
+        if ($companyId === '') {
+            // create
+            if (CompanyHasUsers::where('user_id', $user->id)->first()) {
+                $result['error'] = 'You already related to company.';
+                return $result;
+            }
+
+            $company = new Company();
+            $company->id = uniqid();
+            $company->owner_id = $user->id;
+            $company->creator_id = $user->id;
+            $company->created_at = new \DateTime();
+
+            $companyHasUsers = new CompanyHasUsers();
+            $companyHasUsers->user_id = $user->id;
+            $companyHasUsers->company_id = $company->id;
+        } else {
+            // update
+
+            /** @var Company $company */
+            $company = Company::find($companyId);
+
+            if (!$company) {
+                $result['error'] = 'Server error';
+                return $result;
+            }
+
+            if ($company->owner_id !== $user->id) {
+                $result['error'] = 'Access denied!';
+                return $result;
+            }
+        }
+
+        $company->name = $request->get('company_name');
+        $company->updated_at = new \DateTime();
+
+        DB::beginTransaction();
+        if ($company->save() && ($companyHasUsers === null || $companyHasUsers->save())) {
+            $result['success'] = true;
+            DB::commit();
+        } else {
+            $result['error'] = 'Server error';
+            DB::rollBack();
+        }
 
         return $result;
     }
@@ -161,6 +232,28 @@ class ProfileController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $company = $user->company();
+
+        if ($company) {
+            $companyCreator = [
+                'id' => $company->creator_id,
+                'name' => $user->id === $company->creator_id ? $user->name : $company->creator()->name,
+            ];
+            $companyOwner = [
+                'id' => $company->owner_id,
+                'name' => $user->id === $company->creator_id ? $user->name : $company->owner()->name,
+            ];
+            $company = [
+                'id' => $company->id,
+                'name' => $company->name,
+                'updated_at' => date('d M. Y (H:i:s)', strtotime($company->updated_at)),
+                'created_at' => date('d M. Y (H:i:s)', strtotime($company->created_at)),
+            ];
+        } else {
+            $company = null;
+            $companyCreator = null;
+            $companyOwner = null;
+        }
 
         return [
             'name' => $user->name,
@@ -168,6 +261,9 @@ class ProfileController extends Controller
             'position' => $user->position,
             'role' => $user->role,
             'roles' => User::ROLES,
+            'company' => $company,
+            'companyCreator' => $companyCreator,
+            'companyOwner' => $companyOwner,
         ];
     }
 }

@@ -5,6 +5,40 @@ import {string} from 'yup';
 import CommonForm from './../../components/common/Form';
 
 export default () => {
+    let fields = [
+        {
+            name: 'name',
+            type: 'text',
+            label: 'Name',
+        },
+        {
+            name: 'email',
+            type: 'email',
+            label: 'Email',
+        },
+        {
+            name: 'password',
+            type: 'password',
+            label: 'Password',
+        },
+    ];
+
+    let getParameters = {};
+    window.location.href.replace(
+        /[?&]+([^=&]+)=([^&]*)/gi,
+        function(m, key, value) {
+            getParameters[key] = value;
+        }
+    );
+
+    if (getParameters['company_id']) {
+        fields.push({
+            name: 'company_id',
+            type: 'hidden',
+            value: getParameters['company_id'],
+        });
+    }
+
     return (
         <Container>
             <Row>
@@ -30,28 +64,9 @@ export default () => {
                                         .max(255, 'Too Long!')
                                         .required('Required'),
                                 }}
-                                fields={[
-                                    {
-                                        name: 'name',
-                                        type: 'text',
-                                        label: 'Name',
-                                    },
-                                    {
-                                        name: 'email',
-                                        type: 'email',
-                                        label: 'Email',
-                                    },
-                                    {
-                                        name: 'password',
-                                        type: 'password',
-                                        label: 'Password',
-                                    },
-                                ]}
-                                url='/auth/register'
+                                fields={fields}
+                                url='auth/register'
                                 submit_text='Register'
-                                on_success_cb={() => {
-                                    console.log('Registered')
-                                }}
                                 success_message={'You registered successful!'}
                             />
                         </Card.Body>

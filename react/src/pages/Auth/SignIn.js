@@ -7,7 +7,11 @@ import UserService from "../../services/UserService";
 
 export default () => {
     const onSuccessCallBack = data => {
-        UserService.signIn(data.data.token, data.data.name);
+        UserService.signIn(
+            data.data.id,
+            data.data.token,
+            data.data.name
+        );
         window.location.replace("/user/dash");
     };
 

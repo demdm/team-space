@@ -24,6 +24,7 @@ $router->group(['prefix' => 'user', 'middleware' => 'auth'], function () use ($r
         $router->post('edit-email', 'ProfileController@editEmail');
         $router->post('edit-password', 'ProfileController@editPassword');
         $router->post('edit-position', 'ProfileController@editPosition');
+        $router->post('edit-company', 'ProfileController@editCompany');
         $router->post('get-data', 'ProfileController@getData');
     });
 });

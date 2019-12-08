@@ -137,10 +137,12 @@ export default (props) => {
 
                     {props.fields.map((field, key) => (
                         <Form.Group controlId={field.name + '_' + key} key={key}>
-                            <Form.Label>{ field.label }</Form.Label>
+                            {field.type !== 'hidden' &&
+                                <Form.Label>{ field.label }</Form.Label>
+                            }
 
                             {/* TEXT */}
-                            {['text', 'email', 'password'].includes(field.type) &&
+                            {['text', 'email', 'password', 'hidden'].includes(field.type) &&
                                 <Form.Control
                                     autoFocus={enableAutoFocus && key === 0}
                                     type={field.type}
@@ -149,6 +151,7 @@ export default (props) => {
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     isInvalid={!!touched[field.name] && !!errors[field.name]}
+                                    disabled={field.disabled === true}
                                 />
                             }
 
@@ -161,6 +164,7 @@ export default (props) => {
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     isInvalid={!!touched[field.name] && !!errors[field.name]}
+                                    disabled={field.disabled === true}
                                 >
                                     {
                                         Object.keys(field.options).map((value, key) => (
@@ -198,6 +202,7 @@ export default (props) => {
                         <Button
                             variant="primary"
                             type="submit"
+                            disabled={props.fields.length === props.fields.filter(field => field.disabled === true).length}
                         >
                             { props.submit_text }
                         </Button>

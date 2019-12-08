@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Company;
+use App\CompanyHasUsers;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Rhumsaa\Uuid\Uuid;
@@ -68,13 +71,17 @@ class AuthController extends Controller
 
         $user->is_online = true;
         $user->online_at = new \DateTime();
-        $user->save();
 
-        $result['success'] = true;
-        $result['data'] = [
-            'name' => $user->name,
-            'token' => $user->api_token,
-        ];
+        if ($user->save()) {
+            $result['success'] = true;
+            $result['data'] = [
+                'name' => $user->name,
+                'token' => $user->api_token,
+            ];
+        } else {
+            $result['error'] = 'Server error';
+        }
+
         return $result;
     }
 
@@ -103,9 +110,9 @@ class AuthController extends Controller
         $user->name = $request->get('name');
         $user->email = $request->get('email');
         $user->password = Hash::make($request->get('password'));
-        $user->position = 'HR manager';
+        $user->position = '';
         $user->api_token = md5(uniqid($request->get('email') . time(), true));
-        $user->role = User::ROLE_HR_MANAGER;
+        $user->role = User::ROLE_EMPLOYEE;
         $user->auth_status = User::AUTH_STATUS_ACTIVE;
         $user->presence_status = User::PRESENCE_STATUS_WORK;
         $user->work_type = User::WORK_TYPE_OFFICE;
@@ -114,16 +121,33 @@ class AuthController extends Controller
         $user->created_at = new \DateTime();
         $user->updated_at = new \DateTime();
 
-        if (!$user->save()) {
-            $result['error'] = 'Server error';
-            return $result;
+        $companyHasUsers = null;
+        $companyId = $request->get('company_id');
+
+        if ($companyId) {
+            if (!Company::find($companyId)) {
+                $result['error'] = 'Company not found';
+                return $result;
+            }
+
+            $companyHasUsers = new CompanyHasUsers();
+            $companyHasUsers->user_id = $user->id;
+            $companyHasUsers->company_id = $companyId;
         }
 
-        $result['success'] = true;
-        $result['data'] = [
-            'name' => $user->name,
-            'token' => $user->api_token,
-        ];
+        DB::beginTransaction();
+        if ($user->save() && ($companyHasUsers === null || $companyHasUsers->save())) {
+            $result['success'] = true;
+            $result['data'] = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'token' => $user->api_token,
+            ];
+            DB::commit();
+        } else {
+            $result['error'] = 'Server error';
+            DB::rollBack();
+        }
 
         return $result;
     }

@@ -6,16 +6,21 @@ import {
     Col,
     Row,
     Tab,
-    Nav,
+    Nav, Alert, ListGroup,
 } from "react-bootstrap";
 import HttpClient from "../../services/HttpClient";
 import {useDispatch} from "react-redux";
 import {changeName} from "../../actions";
+import UserService from "../../services/UserService";
 
 export default () => {
     const dispatch = useDispatch();
+    const userId = UserService.id;
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [company, setCompany] = useState(null);
+    const [companyCreator, setCompanyCreator] = useState(null);
+    const [companyOwner, setCompanyOwner] = useState(null);
     const [position, setPosition] = useState('');
     const [role, setRole] = useState('');
     const [roleOptions, setRoleOptions] = useState({});
@@ -33,6 +38,9 @@ export default () => {
                 setPosition(response.data.position);
                 setRole(response.data.role);
                 setRoleOptions(response.data.roles);
+                setCompany(response.data.company);
+                setCompanyCreator(response.data.companyCreator);
+                setCompanyOwner(response.data.companyOwner);
             })
             .catch(error => {
                 console.log(error);
@@ -55,6 +63,9 @@ export default () => {
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link eventKey="password">Password</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="company">Company</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link eventKey="position">Position</Nav.Link>
@@ -117,6 +128,56 @@ export default () => {
                                     url='user/profile/edit-password'
                                     submit_text='Save'
                                     success_message='Password updated!'
+                                />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey="company">
+                                <Alert variant="info">
+                                    <Alert.Heading>Company management</Alert.Heading>
+                                    <p>
+                                        The first one who created the company becomes the owner. <br/>
+                                        The owner can give the own right to another user.
+                                    </p>
+                                    <ListGroup>
+                                        {companyCreator && companyCreator.name &&
+                                            <ListGroup.Item>Creator - {companyCreator.name}</ListGroup.Item>
+                                        }
+                                        {companyOwner && companyOwner.name &&
+                                            <ListGroup.Item>Owner - {companyOwner.name}</ListGroup.Item>
+                                        }
+                                        {company &&
+                                            <>
+                                                <ListGroup.Item>Created - {company.created_at}</ListGroup.Item>
+                                                <ListGroup.Item>Updated - {company.updated_at}</ListGroup.Item>
+                                            </>
+                                        }
+                                    </ListGroup>
+                                </Alert>
+                                <CommonForm
+                                    schema={{
+                                        company_name: string()
+                                            .min(2, 'Too Short!')
+                                            .max(255, 'Too Long!')
+                                            .required('Required'),
+                                    }}
+                                    fields={[
+                                        {
+                                            name: 'id',
+                                            type: 'hidden',
+                                            label: 'Company id',
+                                            value: (company && company.id) || '',
+                                            disabled: true,
+                                        },
+                                        {
+                                            name: 'company_name',
+                                            type: 'text',
+                                            label: 'Company name',
+                                            value: (company && company.name) || '',
+                                            disabled: companyOwner && userId !== companyOwner.id,
+                                        },
+                                    ]}
+                                    url='user/profile/edit-company'
+                                    submit_text={company ? 'Update' : 'Create' }
+                                    success_message='Company saved!'
                                 />
                             </Tab.Pane>
                             <Tab.Pane eventKey="position">

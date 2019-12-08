@@ -53,21 +53,30 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     const WORK_TYPE_REMOTE = 'remote';
     const WORK_TYPE_FREELANCE = 'freelance';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    protected $keyType = 'string';
+
     protected $fillable = [
         'name', 'email',
     ];
 
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
     ];
+
+    public function createdCompany(): ?Company
+    {
+        return Company::where('creator_id', $this->id)->first();
+    }
+
+    public function ownedCompany(): ?Company
+    {
+        return Company::where('owner_id', $this->id)->first();
+    }
+
+    public function company(): ?Company
+    {
+        return ($companyHasUsers = CompanyHasUsers::where('user_id', $this->id)->first())
+            ? (Company::find($companyHasUsers->company_id))
+            : null;
+    }
 }
