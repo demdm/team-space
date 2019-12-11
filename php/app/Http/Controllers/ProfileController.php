@@ -208,7 +208,7 @@ class ProfileController extends Controller
             }
 
             if ($company->owner_id !== $user->id) {
-                $result['error'] = 'Access denied!';
+                $result['error'] = 'Only company owner can change the company';
                 return $result;
             }
         }

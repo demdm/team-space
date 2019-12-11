@@ -75,6 +75,7 @@ class AuthController extends Controller
         if ($user->save()) {
             $result['success'] = true;
             $result['data'] = [
+                'id' => $user->id,
                 'name' => $user->name,
                 'token' => $user->api_token,
             ];
