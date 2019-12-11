@@ -178,9 +178,9 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $companyId = $request->get('id');
+        $companyId = $request->get('company_id');
         $companyHasUsers = null;
-        if ($companyId === '') {
+        if (!$companyId) {
             // create
             if (CompanyHasUsers::where('user_id', $user->id)->first()) {
                 $result['error'] = 'You already related to company.';
@@ -219,6 +219,9 @@ class ProfileController extends Controller
         DB::beginTransaction();
         if ($company->save() && ($companyHasUsers === null || $companyHasUsers->save())) {
             $result['success'] = true;
+            $result['data'] = [
+                'company_id' => $company->id,
+            ];
             DB::commit();
         } else {
             $result['error'] = 'Server error';

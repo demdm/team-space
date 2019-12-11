@@ -16,8 +16,9 @@ import {areObjectsEqual} from "../../helpers/object";
 export default (props) => {
 
     // values
-    const [initialValues, setInitialValues] = useState({});
-    const [currentValues, setCurrentValues] = useState({});
+    const [initValues, setInitValues] = useState(null);
+    const [formInitialValues, setFormInitialValues] = useState({});
+    const [formCurrentValues, setFormCurrentValues] = useState({});
 
     // message
     const [info, setInfo] = useState(null);
@@ -31,7 +32,7 @@ export default (props) => {
     const enableAutoFocus = props.enable_auto_focus === true;
     const enableResetFormOnSuccess = props.enable_reset_form_on_success === true;
 
-    const schema = object().shape(props.schema);
+    const formSchema = object().shape(props.schema);
 
     const hideAllMessages = (timeout = 2000) => {
         setTimeout(() => {
@@ -45,8 +46,10 @@ export default (props) => {
         let fields = {};
         props.fields.forEach(field => fields[field.name] = field.value);
 
-        setInitialValues(fields);
-        setCurrentValues(fields);
+        setFormInitialValues(fields);
+        setFormCurrentValues(fields);
+
+        setInitValues(props.init_values);
     }, [
         props,
     ]);
@@ -54,14 +57,14 @@ export default (props) => {
     return (
         <Formik
             enableReinitialize
-            initialValues={initialValues}
-            validationSchema={schema}
+            initialValues={formInitialValues}
+            validationSchema={formSchema}
             onSubmit={(values, actions) => {
                 setInfo(null);
                 setError(null);
                 setSuccess(null);
 
-                if (areObjectsEqual(values, currentValues)) {
+                if (areObjectsEqual(values, formCurrentValues)) {
                     setInfo('Nothing has been changed');
                     hideAllMessages();
                     return;
@@ -69,8 +72,12 @@ export default (props) => {
 
                 setRequestHandling(true);
 
+                let valuesForRequest = typeof initValues === 'object'
+                    ? {...initValues, ...values}
+                    : values;
+
                 HttpClient
-                    .preparePostRequest(props.url, values)
+                    .preparePostRequest(props.url, valuesForRequest)
                     .then(response => {
                         setSuccess(response.data.success);
                         setError(null);
@@ -91,10 +98,10 @@ export default (props) => {
                             }
 
                             if (typeof props.on_success_cb === 'function') {
-                                props.on_success_cb(response.data, values);
+                                props.on_success_cb(response.data, valuesForRequest);
                             }
 
-                            setCurrentValues(values);
+                            setFormCurrentValues(values);
                         }
                     })
                     .catch(error => {
@@ -137,7 +144,7 @@ export default (props) => {
 
                     {props.fields.map((field, key) => (
                         <Form.Group controlId={field.name + '_' + key} key={key}>
-                            {field.type !== 'hidden' &&
+                            {(field.type !== 'hidden' && field.label) &&
                                 <Form.Label>{ field.label }</Form.Label>
                             }
 

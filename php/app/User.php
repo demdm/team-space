@@ -54,6 +54,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     const WORK_TYPE_FREELANCE = 'freelance';
 
     protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'name', 'email',

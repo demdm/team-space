@@ -9,8 +9,8 @@ import {
     Nav, Alert, ListGroup,
 } from "react-bootstrap";
 import HttpClient from "../../services/HttpClient";
-import {useDispatch} from "react-redux";
-import {changeName} from "../../actions";
+import {useDispatch, useSelector} from "react-redux";
+import {changeName, setCompanyId} from "../../actions";
 import UserService from "../../services/UserService";
 
 export default () => {
@@ -19,14 +19,19 @@ export default () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [company, setCompany] = useState(null);
+    const companyId = useSelector(state => state.company.id);
     const [companyCreator, setCompanyCreator] = useState(null);
     const [companyOwner, setCompanyOwner] = useState(null);
     const [position, setPosition] = useState('');
     const [role, setRole] = useState('');
     const [roleOptions, setRoleOptions] = useState({});
 
-    const onEmailEditedSuccessCb = (response, values) => {
+    const onNameEditedSuccessCb = (response, values) => {
         dispatch(changeName(values.name));
+    };
+
+    const onCompanyEditedSuccessCb = (response, values) => {
+        dispatch(setCompanyId(values.company_id));
     };
 
     useEffect(() => {
@@ -41,11 +46,15 @@ export default () => {
                 setCompany(response.data.company);
                 setCompanyCreator(response.data.companyCreator);
                 setCompanyOwner(response.data.companyOwner);
+
+                if (response.data.company) {
+                    dispatch(setCompanyId(response.data.company.id));
+                }
             })
             .catch(error => {
-                console.log(error);
+                console.error(error);
             });
-    },[]);
+    },[dispatch]);
 
     return (
         <Layout>
@@ -91,7 +100,7 @@ export default () => {
                                     url='user/profile/edit-name'
                                     submit_text='Save'
                                     success_message='Name updated!'
-                                    on_success_cb={onEmailEditedSuccessCb}
+                                    on_success_cb={onNameEditedSuccessCb}
                                 />
                             </Tab.Pane>
                             <Tab.Pane eventKey="email">
@@ -161,13 +170,6 @@ export default () => {
                                     }}
                                     fields={[
                                         {
-                                            name: 'id',
-                                            type: 'hidden',
-                                            label: 'Company id',
-                                            value: (company && company.id) || '',
-                                            disabled: true,
-                                        },
-                                        {
                                             name: 'company_name',
                                             type: 'text',
                                             label: 'Company name',
@@ -175,9 +177,13 @@ export default () => {
                                             disabled: companyOwner && userId !== companyOwner.id,
                                         },
                                     ]}
+                                    init_values={{
+                                        company_id: companyId,
+                                    }}
                                     url='user/profile/edit-company'
                                     submit_text={company ? 'Update' : 'Create' }
                                     success_message='Company saved!'
+                                    on_success_cb={onCompanyEditedSuccessCb}
                                 />
                             </Tab.Pane>
                             <Tab.Pane eventKey="position">

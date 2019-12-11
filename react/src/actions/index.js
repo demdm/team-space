@@ -17,3 +17,8 @@ export const changeName = name => ({
     type: 'CHANGE_NAME',
     name,
 });
+
+export const setCompanyId = id => ({
+    type: 'SET_ID',
+    id,
+});
