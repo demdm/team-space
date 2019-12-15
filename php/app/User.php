@@ -2,11 +2,7 @@
 
 namespace App;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Lumen\Auth\Authorizable;
 
 /**
  * @property string $id
@@ -27,10 +23,8 @@ use Laravel\Lumen\Auth\Authorizable;
  * @property string|null $created_at
  * @property string|null $updated_at
  */
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Model
 {
-    use Authenticatable, Authorizable;
-
     const AUTH_STATUS_PENDING = 'pending';
     const AUTH_STATUS_ACTIVE = 'active';
     const AUTH_STATUS_BANNED = 'banned';
@@ -48,18 +42,26 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     const PRESENCE_STATUS_WORK = 'work';
     const PRESENCE_STATUS_VACATION = 'vacation';
     const PRESENCE_STATUS_SICK = 'sick';
+    const PRESENCE_STATUSES = [
+        self::PRESENCE_STATUS_WORK => 'at work',
+        self::PRESENCE_STATUS_VACATION => 'on vacation',
+        self::PRESENCE_STATUS_SICK => 'sick off',
+    ];
 
     const WORK_TYPE_OFFICE = 'office';
     const WORK_TYPE_REMOTE = 'remote';
     const WORK_TYPE_FREELANCE = 'freelance';
+    const WORK_TYPES = [
+        self::WORK_TYPE_OFFICE => 'office',
+        self::WORK_TYPE_REMOTE => 'remote',
+        self::WORK_TYPE_FREELANCE => 'freelance',
+    ];
 
     protected $keyType = 'string';
     public $incrementing = false;
-
     protected $fillable = [
         'name', 'email',
     ];
-
     protected $hidden = [
         'password',
     ];

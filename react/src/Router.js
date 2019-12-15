@@ -10,6 +10,7 @@ import SignUp from './pages/Auth/SignUp';
 import SignIn from './pages/Auth/SignIn';
 import Dash from './pages/Dash/Dash';
 import Profile from './pages/Dash/Profile';
+import Employee from './pages/Dash/Employee';
 
 export default () => {
     return (
@@ -28,6 +29,9 @@ export default () => {
             </PrivateRoute>
             <PrivateRoute exact path='/user/profile'>
                 <Profile/>
+            </PrivateRoute>
+            <PrivateRoute exact path='/user/employee'>
+                <Employee/>
             </PrivateRoute>
         </Switch>
     );

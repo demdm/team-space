@@ -149,7 +149,7 @@ export default (props) => {
                             }
 
                             {/* TEXT */}
-                            {['text', 'email', 'password', 'hidden'].includes(field.type) &&
+                            {['text', 'email', 'password', 'hidden', 'number'].includes(field.type) &&
                                 <Form.Control
                                     autoFocus={enableAutoFocus && key === 0}
                                     type={field.type}
@@ -159,6 +159,9 @@ export default (props) => {
                                     onBlur={handleBlur}
                                     isInvalid={!!touched[field.name] && !!errors[field.name]}
                                     disabled={field.disabled === true}
+                                    placeholder={field.placeholder !== null ? field.placeholder : false}
+                                    min={field.min !== null ? field.min : false}
+                                    max={field.max !== null ? field.max : false}
                                 />
                             }
 
@@ -184,6 +187,12 @@ export default (props) => {
                                         ))
                                     }
                                 </Form.Control>
+                            }
+
+                            { field.hint &&
+                                <Form.Text className="text-muted">
+                                    {field.hint}
+                                </Form.Text>
                             }
 
                             <Form.Control.Feedback type="invalid">

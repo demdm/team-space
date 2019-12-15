@@ -10,6 +10,9 @@ export default () => {
         }, {
             'to': '/user/profile',
             'name': 'Profile',
+        }, {
+            'to': '/user/employee',
+            'name': 'Employee',
         },
     ];
 

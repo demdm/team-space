@@ -27,4 +27,7 @@ $router->group(['prefix' => 'user', 'middleware' => 'auth'], function () use ($r
         $router->post('edit-company', 'ProfileController@editCompany');
         $router->post('get-data', 'ProfileController@getData');
     });
+    $router->group(['prefix' => 'employee'], function () use ($router) {
+        $router->post('', 'EmployeeController@list');
+    });
 });
